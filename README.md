@@ -1,5 +1,7 @@
 # AI-Enhanced Admission Management System
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/944f85df-272d-4a0d-84af-3a14fb595988/deploy-status)](https://app.netlify.com/projects/gradiousadmissionmanagementsystem/deploys)
+
 > 🚀 **Live Production Deployment (Netlify):** [https://gradiousadmissionmanagementsystem.netlify.app/](https://gradiousadmissionmanagementsystem.netlify.app/)  
 > 🎓 **Institutional Portal:** Apex Institute of Technology • Admission Management Platform
 
