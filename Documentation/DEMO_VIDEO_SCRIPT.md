@@ -87,8 +87,8 @@
 ---
 
 ### 7. Conclusion & Wrap Up (08:30 - 09:00)
-- **On Screen:** Switch back to the web portal landing page (`http://127.0.0.1:5000`).
+- **On Screen:** Switch back to the web portal landing page (`https://gradiousadmissionmanagementsystem.netlify.app/` or `http://127.0.0.1:5000`).
 - **What to Say:**
   > *"To summarize, this project provides a complete, production-ready, AI-enhanced educational admission management system that streamlines application handling, delivers transparent ML eligibility scoring, and automates AI evaluation reporting.*  
-  > *The entire system runs locally with a single command: `python run.py`.*  
+  > *The live web portal is active at https://gradiousadmissionmanagementsystem.netlify.app/ and also runs locally with `python run.py`.*  
   > *Thank you very much!"*

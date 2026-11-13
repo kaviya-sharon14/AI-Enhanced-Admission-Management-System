@@ -4,6 +4,8 @@
 **Project Title:** AI-Enhanced Admission Management System  
 **Submission Category:** Full-Stack Web Application + Machine Learning + Generative AI  
 **Academic Cycle:** 2026  
+**Live Production URL:** [https://gradiousadmissionmanagementsystem.netlify.app/](https://gradiousadmissionmanagementsystem.netlify.app/)  
+**GitHub Repository:** [https://github.com/kaviya-sharon14/AI-Enhanced-Admission-Management-System](https://github.com/kaviya-sharon14/AI-Enhanced-Admission-Management-System)  
 
 ---
 
