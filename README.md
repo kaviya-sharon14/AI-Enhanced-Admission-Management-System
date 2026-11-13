@@ -5,6 +5,17 @@
 > 🚀 **Live Production Deployment (Netlify):** [https://gradiousadmissionmanagementsystem.netlify.app/](https://gradiousadmissionmanagementsystem.netlify.app/)  
 > 🎓 **Institutional Portal:** Apex Institute of Technology • Admission Management Platform
 
+---
+
+## 🎥 Demo Explanation Videos
+
+| | Video | Link |
+|:---|:---|:---|
+| 📹 **Part 1** | Project Introduction, Full Walkthrough & Live Demo | [▶ Watch on Loom](https://www.loom.com/share/8c29427c939b4d7ebae4717f282d602d) |
+| 📹 **Part 2** | ML Prediction, GenAI Feature & Code Explanation | [▶ Watch on Loom](https://www.loom.com/share/d091c065ed0e471391d4e1ad3b15a660) |
+
+---
+
 An institutional-grade, full-stack educational management platform engineered for universities and academic institutions to automate student admission workflows, predict applicant eligibility using Machine Learning (**Logistic Regression**), synthesize comprehensive candidate dossiers with **Generative AI**, and provide real-time institutional enrollment analytics.
 
 ---
