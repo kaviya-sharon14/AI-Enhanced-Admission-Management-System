@@ -27,7 +27,7 @@ auth_bp = Blueprint('auth_bp', __name__)
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     name = data.get('name', '').strip()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '').strip()
@@ -81,7 +81,7 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     email = data.get('email', '').strip().lower()
     password = data.get('password', '').strip()
     
@@ -139,7 +139,7 @@ def forgot_password():
     Generates a 6-digit reset code for a registered user's email.
     Saves in SQLite and MongoDB, and returns code for instant UI confirmation.
     """
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     email = data.get('email', '').strip().lower()
     
     if not email:
@@ -182,7 +182,7 @@ def reset_password():
     Validates the 6-digit reset code and sets a new password.
     Updates SQLite and MongoDB.
     """
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     email = data.get('email', '').strip().lower()
     reset_code = str(data.get('reset_code', '')).strip()
     new_password = data.get('new_password', '').strip()
