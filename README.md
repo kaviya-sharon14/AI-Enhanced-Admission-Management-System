@@ -6,15 +6,17 @@ An institutional-grade, full-stack educational management platform engineered fo
 
 ## 📌 Table of Contents
 1. [Project Title & Overview](#-project-title--overview)
-2. [Technologies Used](#-technologies-used)
-3. [Setup Instructions](#-setup-instructions)
-4. [Steps to Run the Backend](#-steps-to-run-the-backend)
-5. [Steps to Run the Frontend](#-steps-to-run-the-frontend)
-6. [Database Setup Details (SQLite & MongoDB)](#-database-setup-details)
-7. [Machine Learning Model Details](#-machine-learning-model-details)
-8. [Generative AI & API Key Instructions](#-generative-ai--api-key-instructions)
-9. [Pre-Configured Test Credentials](#-pre-configured-test-credentials)
-10. [REST API Endpoints](#-rest-api-endpoints)
+2. [Web Portal Visual Walkthrough (Screenshots)](#-web-portal-visual-walkthrough)
+3. [Technologies Used](#-technologies-used)
+4. [Setup Instructions](#-setup-instructions)
+5. [Steps to Run the Backend](#-steps-to-run-the-backend)
+6. [Steps to Run the Frontend](#-steps-to-run-the-frontend)
+7. [Database Setup Details (SQLite & MongoDB)](#-database-setup-details)
+8. [Machine Learning Model Details](#-machine-learning-model-details)
+9. [Generative AI & API Key Instructions](#-generative-ai--api-key-instructions)
+10. [Pre-Configured Test Credentials](#-pre-configured-test-credentials)
+11. [REST API Endpoints](#-rest-api-endpoints)
+12. [Hosting on Netlify & GitHub Push Instructions](#-hosting-on-netlify--github-deployment)
 
 ---
 
@@ -31,6 +33,30 @@ Traditional university admission cycles suffer from manual bottlenecks, human re
 * **Automated Machine Learning Scoring:** Instant eligibility classification and calibrated probability estimation (0% - 100%) powered by Scikit-Learn Logistic Regression.
 * **Generative AI Dossiers:** Transforms raw applicant marks and predictive probabilities into structured institutional evaluation reports containing Executive Summaries, Recommendations, Profile Strengths/Risks, and Statutory Justifications.
 * **Executive Analytics:** Real-time data visualization (powered by Chart.js) for program demand, quota allocation, and admission status with instant CSV dataset export.
+
+---
+
+## 📸 Web Portal Visual Walkthrough
+
+### 1. Institutional Landing Page (`/`)
+*Live metrics counters, system architecture pillars, and quick student/officer portal access.*
+![Landing Page](Documentation/screenshots/01_landing_page.png)
+
+### 2. Authentication & Self-Service Password Recovery (`/login`)
+*Multi-role sign in, new student account creation, 1-click evaluation credentials, and 6-digit password recovery.*
+![Authentication Portal](Documentation/screenshots/02_login_portal.png)
+
+### 3. Student Portal — Live ML Pre-Check & Progress Stepper (`/student`)
+*Candidate academic scores, uploaded marksheets, instant ML probability meter (94.8% eligible), and GenAI evaluation dossier.*
+![Student Portal](Documentation/screenshots/03_student_portal.png)
+
+### 4. Admission Officer Review Console & Action Modal (`/admin`)
+*Filterable master applications table with ML eligibility badges, candidate inspection modal, and administrative Approve / Reject buttons.*
+![Admin Review Console](Documentation/screenshots/04_admin_dashboard.png)
+
+### 5. Executive Enrollment Analytics & Audit Reports (`/analytics`)
+*Interactive Chart.js visualizations for program demand, status distribution, quota allocation, and one-click CSV export.*
+![Executive Analytics](Documentation/screenshots/05_analytics_dashboard.png)
 
 ---
 
@@ -253,6 +279,37 @@ YourName_ProjectName/
 │   └── DEMO_VIDEO_SCRIPT.md
 ├── README.md                 # Project overview, setup, and execution guide
 ├── run.py                    # One-command project launcher
-├── test_mongo.py             # MongoDB connection & migration utility
-└── test_auth_flow.py         # Automated authentication verification test suite
+├── netlify.toml              # Netlify configuration & routing proxy
+├── .env.example              # Environment variables template
+└── .gitignore                # Git ignore rules for virtual environments & secrets
 ```
+
+---
+
+## 🚀 Hosting on Netlify & GitHub Deployment
+
+### 1. GitHub Deployment (Push to your repository)
+The local repository is already initialized on branch `main` with user identity configured.
+To push to your GitHub account (`https://github.com/kaviya-sharon14`):
+
+1. Create a new repository on GitHub: [https://github.com/new](https://github.com/new)
+   - Repository name: `AI-Admission-Management-System` (or your preferred name)
+   - Choose **Public** (or Private)
+   - Do **NOT** initialize with a README, .gitignore or license (they are already present).
+2. Run these commands in your project terminal:
+   ```bash
+   git remote add origin https://github.com/kaviya-sharon14/AI-Admission-Management-System.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+### 2. Netlify Deployment
+* The repository includes [`netlify.toml`](file:///c:/Users/user/Downloads/gradious%20project%20for%20submmision/netlify.toml) and [`Frontend/_redirects`](file:///c:/Users/user/Downloads/gradious%20project%20for%20submmision/Frontend/_redirects) for zero-config deployment.
+* **Option A (Instant Drag & Drop):**
+  1. Open [app.netlify.com](https://app.netlify.com) and log in.
+  2. Drag and drop the `Frontend/` folder into the Netlify Sites dashboard.
+* **Option B (Connected to GitHub):**
+  1. In Netlify, click **"Add new site"** ➔ **"Import an existing project from GitHub"**.
+  2. Select your repository `kaviya-sharon14/AI-Admission-Management-System`.
+  3. Netlify will auto-detect `netlify.toml` and deploy the site instantly.
+
