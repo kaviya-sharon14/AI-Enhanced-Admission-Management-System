@@ -1,0 +1,6 @@
+/login      /login.html      200
+/student    /student.html    200
+/admin      /admin.html      200
+/analytics  /analytics.html  200
+/api/*      https://your-backend-api.onrender.com/api/:splat  200
+/*          /index.html      200

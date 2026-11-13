@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admission Reports & Analytics Dashboard - Apex Institute</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .chart-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <div class="brand-icon">📊</div>
+      <div class="brand-text">
+        Apex Institute <span>Admissions</span>
+        <span class="brand-sub">Executive Analytics & Reports</span>
+      </div>
+    </a>
+    
+    <ul class="nav-links">
+      <li class="nav-item"><a href="/">Home</a></li>
+      <li class="nav-item"><a href="/student">Student Portal</a></li>
+      <li class="nav-item"><a href="/admin">Officer Dashboard</a></li>
+      <li class="nav-item"><a href="/analytics" class="active">Analytics & Reports</a></li>
+    </ul>
+
+    <div id="nav-auth-container" class="nav-links"></div>
+  </nav>
+
+  <main class="container">
+    
+    <!-- Title & Export Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1>Admission Reports & Intelligence Dashboard</h1>
+        <p style="color: var(--text-muted);">Real-time statistical breakdowns of student applications, quotas, and predictive eligibility.</p>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-secondary btn-sm" onclick="loadAnalytics()">🔄 Refresh Data</button>
+        <a href="/api/analytics/export-csv" class="btn btn-primary btn-sm">📥 Download CSV Report</a>
+      </div>
+    </div>
+
+    <!-- Executive Summary KPI Row -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon primary">📝</div>
+        <div class="stat-content">
+          <h3 id="stat-kpi-total">--</h3>
+          <p>Total Applications</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon success">🎯</div>
+        <div class="stat-content">
+          <h3 id="stat-kpi-acceptance">--%</h3>
+          <p>Acceptance Rate</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon purple">🎓</div>
+        <div class="stat-content">
+          <h3 id="stat-kpi-gpa">--%</h3>
+          <p>Average Applicant GPA</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon warning">✍️</div>
+        <div class="stat-content">
+          <h3 id="stat-kpi-entrance">--</h3>
+          <p>Avg Entrance Score</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon success">🤖</div>
+        <div class="stat-content">
+          <h3 id="stat-kpi-ml">--%</h3>
+          <p>ML Eligibility Rate</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Charts Grid -->
+    <div class="charts-grid">
+      
+      <!-- Chart 1: Applications by Course -->
+      <div class="chart-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📚</span> Applications by Academic Program
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="coursesChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Status Breakdown -->
+      <div class="chart-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>⚖️</span> Admission Status Distribution
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 3: Category Quota Distribution -->
+      <div class="chart-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>👥</span> Quota & Category Representation
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 4: Extracurricular Distribution -->
+      <div class="chart-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🏆</span> Extracurricular Distinctions
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="ecChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ML Performance Metrics Table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🤖</span> Active Machine Learning Model Audit
+        </div>
+        <span class="badge badge-eligible">Production Active</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; text-align: center;">
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Model Algorithm</div>
+          <div style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem;">Logistic Regression</div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Test Accuracy</div>
+          <div style="font-size: 1.1rem; font-weight: 700; color: #10b981; margin-top: 0.25rem;">94.80%</div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.85rem; color: var(--text-muted);">ROC-AUC Score</div>
+          <div style="font-size: 1.1rem; font-weight: 700; color: #4361ee; margin-top: 0.25rem;">0.9472</div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Precision & Recall</div>
+          <div style="font-size: 1.1rem; font-weight: 700; color: #8b5cf6; margin-top: 0.25rem;">0.963 / 0.980</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Apex Institute of Technology • Admission Management System</p>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/analytics.js"></script>
+</body>
+</html>

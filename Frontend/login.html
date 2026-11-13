@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In / Register / Reset - Admission Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .auth-wrapper {
+      max-width: 540px;
+      margin: 3rem auto;
+      padding: 0 1rem;
+    }
+    .auth-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      padding: 2.25rem;
+    }
+    .auth-tabs {
+      display: flex;
+      border-bottom: 2px solid #f1f5f9;
+      margin-bottom: 1.5rem;
+      gap: 0.5rem;
+    }
+    .auth-tab {
+      padding: 0.65rem 0.85rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .auth-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .quick-login-pills {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .quick-pill {
+      background: #f1f5f9;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      padding: 0.35rem 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .quick-pill:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .auth-aux-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.35rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+    }
+    .auth-aux-row a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .auth-aux-row a:hover {
+      text-decoration: underline;
+    }
+    .code-banner {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      border-radius: var(--radius-md);
+      padding: 0.85rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .code-badge {
+      background: #047857;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .db-status-bar {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .db-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+    .db-badge.mongo-ok {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .db-badge.sqlite-ok {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <div class="brand-icon">🎓</div>
+      <div class="brand-text">
+        Apex Institute <span>Admissions</span>
+        <span class="brand-sub">Institutional Portal Access</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item"><a href="/">Home</a></li>
+      <li class="nav-item"><a href="/analytics">Analytics</a></li>
+    </ul>
+  </nav>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div style="text-align: center; margin-bottom: 1.25rem;">
+        <h2 id="auth-main-title">Portal Authentication</h2>
+        <p id="auth-main-subtitle" style="color: var(--text-muted); font-size: 0.9rem;">Sign in to access your admission dashboard</p>
+      </div>
+
+      <!-- Quick Demo Access Pills for Project Reviewers -->
+      <div id="demo-credentials-section">
+        <div style="text-align: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+            One-Click Evaluation Credentials:
+          </span>
+        </div>
+        <div class="quick-login-pills" style="justify-content: center;">
+          <button type="button" class="quick-pill" onclick="fillDemo('admin')">
+            🛡️ Fill Admin (Officer)
+          </button>
+          <button type="button" class="quick-pill" onclick="fillDemo('student')">
+            🎓 Fill Student (Applicant)
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Selectors -->
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login-btn" onclick="switchTab('login')">Sign In</div>
+        <div class="auth-tab" id="tab-register-btn" onclick="switchTab('register')">Create Account</div>
+        <div class="auth-tab" id="tab-forgot-btn" onclick="switchTab('forgot')">Forgot Password</div>
+      </div>
+
+      <!-- 1. LOGIN FORM (Existing Users) -->
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group" style="margin-bottom: 1.15rem;">
+          <label for="login-email">Registered Email Address <span class="required">*</span></label>
+          <input type="email" id="login-email" required placeholder="name@institution.edu">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0.5rem;">
+          <label for="login-password">Password <span class="required">*</span></label>
+          <input type="password" id="login-password" required placeholder="Enter your password">
+        </div>
+
+        <div class="auth-aux-row">
+          <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer; color: var(--text-muted);">
+            <input type="checkbox" id="remember-me" checked> Remember email
+          </label>
+          <a href="javascript:void(0)" onclick="switchTab('forgot')">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;" id="login-submit-btn">
+          Sign In to Portal &rarr;
+        </button>
+
+        <div style="text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+          New student applicant? 
+          <a href="javascript:void(0)" onclick="switchTab('register')" style="color: var(--primary); font-weight: 600; text-decoration: none;">Create an Account</a>
+        </div>
+      </form>
+
+      <!-- 2. REGISTER FORM (New Users) -->
+      <form id="register-form" onsubmit="handleRegister(event)" style="display: none;">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="reg-name">Full Name <span class="required">*</span></label>
+          <input type="text" id="reg-name" required placeholder="e.g. Ananya Iyer">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="reg-email">Email Address <span class="required">*</span></label>
+          <input type="email" id="reg-email" required placeholder="ananya.iyer@example.com">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="reg-phone">Phone Number</label>
+          <input type="text" id="reg-phone" placeholder="+91 98765 43210">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="reg-password">Create Password <span class="required">*</span></label>
+          <input type="password" id="reg-password" required placeholder="Minimum 6 characters">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.35rem;">
+          <label for="reg-confirm-password">Confirm Password <span class="required">*</span></label>
+          <input type="password" id="reg-confirm-password" required placeholder="Re-enter password">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;" id="reg-submit-btn">
+          Create Student Account &rarr;
+        </button>
+
+        <div style="text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+          Already have an account? 
+          <a href="javascript:void(0)" onclick="switchTab('login')" style="color: var(--primary); font-weight: 600; text-decoration: none;">Sign In</a>
+        </div>
+      </form>
+
+      <!-- 3. FORGOT PASSWORD & RESET FORM -->
+      <div id="forgot-container" style="display: none;">
+        
+        <!-- Step 1: Request Verification Code -->
+        <form id="forgot-step1-form" onsubmit="handleRequestResetCode(event)">
+          <div style="background: #f8fafc; border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.86rem; color: var(--text-muted); border: 1px solid #e2e8f0;">
+            Enter your registered email address below. A 6-digit verification code will be generated to safely reset your password.
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.35rem;">
+            <label for="forgot-email">Registered Email Address <span class="required">*</span></label>
+            <input type="email" id="forgot-email" required placeholder="e.g. student@institution.edu">
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;" id="forgot-step1-btn">
+            Send Reset Code &rarr;
+          </button>
+        </form>
+
+        <!-- Step 2: Enter Code & New Password -->
+        <form id="forgot-step2-form" onsubmit="handleResetPassword(event)" style="display: none;">
+          <div id="code-display-banner" class="code-banner" style="display: none;">
+            <div>
+              <strong>Verification Code:</strong>
+              <div style="font-size: 0.78rem; opacity: 0.9;">Generated for demo verification</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span id="active-reset-code" class="code-badge">123456</span>
+              <button type="button" class="btn btn-sm btn-secondary" onclick="autoFillCode()" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">Use</button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label for="reset-target-email">Email Address <span class="required">*</span></label>
+            <input type="email" id="reset-target-email" required readonly style="background: #f8fafc; cursor: not-allowed;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label for="reset-code">6-Digit Verification Code <span class="required">*</span></label>
+            <input type="text" id="reset-code" required maxlength="6" placeholder="Enter 6-digit code (e.g. 849201)">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label for="new-password">New Password <span class="required">*</span></label>
+            <input type="password" id="new-password" required placeholder="Minimum 6 characters">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.35rem;">
+            <label for="confirm-new-password">Confirm New Password <span class="required">*</span></label>
+            <input type="password" id="confirm-new-password" required placeholder="Re-enter new password">
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;" id="forgot-step2-btn">
+            Reset Password & Sign In &rarr;
+          </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.25rem; font-size: 0.85rem;">
+          <a href="javascript:void(0)" onclick="switchTab('login')" style="color: var(--text-muted); text-decoration: none; font-weight: 600;">
+            &larr; Back to Sign In
+          </a>
+        </div>
+      </div>
+
+      <!-- Database Connectivity Status Indicator -->
+      <div class="db-status-bar">
+        <span>Storage Backend:</span>
+        <div id="db-status-badge" class="db-badge sqlite-ok" title="Click to view database diagnostics" onclick="checkDatabaseStatus(true)" style="cursor: pointer;">
+          <span>⏳ Checking Database...</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Apex Institute of Technology • AI-Enhanced Admission Management System</p>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Load remembered email on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedEmail = localStorage.getItem('adm_remembered_email');
+      if (savedEmail) {
+        document.getElementById('login-email').value = savedEmail;
+      }
+      checkDatabaseStatus();
+    });
+
+    function switchTab(tab) {
+      const loginForm = document.getElementById('login-form');
+      const regForm = document.getElementById('register-form');
+      const forgotContainer = document.getElementById('forgot-container');
+      
+      const loginTab = document.getElementById('tab-login-btn');
+      const regTab = document.getElementById('tab-register-btn');
+      const forgotTab = document.getElementById('tab-forgot-btn');
+      
+      const title = document.getElementById('auth-main-title');
+      const subtitle = document.getElementById('auth-main-subtitle');
+      const demoSec = document.getElementById('demo-credentials-section');
+
+      // Reset tabs
+      loginTab.classList.remove('active');
+      regTab.classList.remove('active');
+      forgotTab.classList.remove('active');
+
+      if (tab === 'login') {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+        forgotContainer.style.display = 'none';
+        loginTab.classList.add('active');
+        demoSec.style.display = 'block';
+        title.innerText = 'Portal Authentication';
+        subtitle.innerText = 'Sign in to access your admission dashboard';
+      } else if (tab === 'register') {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+        forgotContainer.style.display = 'none';
+        regTab.classList.add('active');
+        demoSec.style.display = 'none';
+        title.innerText = 'New Student Account';
+        subtitle.innerText = 'Register your admission portal credentials';
+      } else if (tab === 'forgot') {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'none';
+        forgotContainer.style.display = 'block';
+        forgotTab.classList.add('active');
+        demoSec.style.display = 'none';
+        title.innerText = 'Password Recovery';
+        subtitle.innerText = 'Reset your admission account password';
+        
+        // Auto-fill forgot email if already typed in login
+        const loginEmail = document.getElementById('login-email').value.trim();
+        if (loginEmail && !document.getElementById('forgot-email').value) {
+          document.getElementById('forgot-email').value = loginEmail;
+        }
+      }
+    }
+
+    function fillDemo(role) {
+      switchTab('login');
+      if (role === 'admin') {
+        document.getElementById('login-email').value = 'admin@institution.edu';
+        document.getElementById('login-password').value = 'Admin@123';
+      } else {
+        document.getElementById('login-email').value = 'student@institution.edu';
+        document.getElementById('login-password').value = 'Student@123';
+      }
+      showToast(`Filled ${role} demo credentials. Click "Sign In"!`, 'info');
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('login-submit-btn');
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const remember = document.getElementById('remember-me').checked;
+      
+      btn.disabled = true;
+      btn.innerText = 'Authenticating...';
+      
+      try {
+        const res = await api.login(email, password);
+        if (res.success) {
+          if (remember) {
+            localStorage.setItem('adm_remembered_email', email);
+          } else {
+            localStorage.removeItem('adm_remembered_email');
+          }
+          api.setToken(res.token);
+          api.setUser(res.user);
+          showToast(`Welcome back, ${res.user.name}!`, 'success');
+          
+          setTimeout(() => {
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get('redirect');
+            if (redirect) {
+              window.location.href = redirect;
+            } else if (res.user.role === 'admin') {
+              window.location.href = '/admin';
+            } else {
+              window.location.href = '/student';
+            }
+          }, 600);
+        }
+      } catch (err) {
+        showToast(err.message || 'Login failed. Please check credentials.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Sign In to Portal →';
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const btn = document.getElementById('reg-submit-btn');
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirmPassword = document.getElementById('reg-confirm-password').value;
+      
+      if (password !== confirmPassword) {
+        showToast('Passwords do not match. Please re-enter.', 'error');
+        return;
+      }
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Creating Account...';
+      
+      try {
+        const res = await api.register({ name, email, phone, password, role: 'student' });
+        if (res.success) {
+          api.setToken(res.token);
+          api.setUser(res.user);
+          showToast('Account registered successfully! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = '/student';
+          }, 700);
+        }
+      } catch (err) {
+        showToast(err.message || 'Registration failed.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Create Student Account →';
+      }
+    }
+
+    // Step 1: Request Reset Code
+    async function handleRequestResetCode(e) {
+      e.preventDefault();
+      const btn = document.getElementById('forgot-step1-btn');
+      const email = document.getElementById('forgot-email').value.trim();
+
+      btn.disabled = true;
+      btn.innerText = 'Generating Code...';
+
+      try {
+        const res = await api.forgotPassword(email);
+        if (res.success) {
+          showToast('Verification code generated!', 'success');
+          
+          // Switch to Step 2
+          document.getElementById('forgot-step1-form').style.display = 'none';
+          document.getElementById('forgot-step2-form').style.display = 'block';
+          document.getElementById('reset-target-email').value = email;
+          
+          // Display the generated reset code for instant verification
+          if (res.reset_code) {
+            document.getElementById('active-reset-code').innerText = res.reset_code;
+            document.getElementById('code-display-banner').style.display = 'flex';
+            document.getElementById('reset-code').value = res.reset_code;
+          }
+        }
+      } catch (err) {
+        showToast(err.message || 'Failed to request reset code.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Send Reset Code →';
+      }
+    }
+
+    function autoFillCode() {
+      const code = document.getElementById('active-reset-code').innerText;
+      document.getElementById('reset-code').value = code;
+      showToast('Code copied to input field!', 'info');
+    }
+
+    // Step 2: Confirm & Reset Password
+    async function handleResetPassword(e) {
+      e.preventDefault();
+      const btn = document.getElementById('forgot-step2-btn');
+      const email = document.getElementById('reset-target-email').value.trim();
+      const resetCode = document.getElementById('reset-code').value.trim();
+      const newPassword = document.getElementById('new-password').value;
+      const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+      if (newPassword !== confirmNewPassword) {
+        showToast('New passwords do not match.', 'error');
+        return;
+      }
+      if (newPassword.length < 6) {
+        showToast('Password must be at least 6 characters.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Updating Password...';
+
+      try {
+        const res = await api.resetPassword(email, resetCode, newPassword);
+        if (res.success) {
+          showToast('Password reset successfully! Please log in.', 'success');
+          // Switch back to login form and pre-fill credentials
+          setTimeout(() => {
+            switchTab('login');
+            document.getElementById('login-email').value = email;
+            document.getElementById('login-password').value = newPassword;
+            // Reset forgot forms
+            document.getElementById('forgot-step1-form').style.display = 'block';
+            document.getElementById('forgot-step2-form').style.display = 'none';
+            document.getElementById('code-display-banner').style.display = 'none';
+          }, 1200);
+        }
+      } catch (err) {
+        showToast(err.message || 'Password reset failed. Invalid or expired code.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Reset Password & Sign In →';
+      }
+    }
+
+    // Database Diagnostics
+    async function checkDatabaseStatus(showNotification = false) {
+      const badge = document.getElementById('db-status-badge');
+      try {
+        const res = await api.getDbStatus();
+        if (res.success) {
+          if (res.mongodb && res.mongodb.connected) {
+            badge.className = 'db-badge mongo-ok';
+            badge.innerHTML = `<span>🍃 MongoDB Connected</span>`;
+            if (showNotification) {
+              showToast(`MongoDB Connected! Database: ${res.mongodb.database} (${res.mongodb.counts.users || 0} users)`, 'success');
+            }
+          } else {
+            badge.className = 'db-badge sqlite-ok';
+            badge.innerHTML = `<span>🗄️ SQLite Active (MongoDB Ready)</span>`;
+            if (showNotification) {
+              showToast('Active Storage: SQLite (admissions.db). Set MONGO_URI in .env to enable live MongoDB.', 'info');
+            }
+          }
+        }
+      } catch (err) {
+        badge.className = 'db-badge sqlite-ok';
+        badge.innerHTML = `<span>🗄️ Storage: Active</span>`;
+      }
+    }
+  </script>
+</body>
+</html>

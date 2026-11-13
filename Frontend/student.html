@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Admission Portal - Apex Institute</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .student-tabs {
+      display: flex;
+      gap: 1rem;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 2rem;
+    }
+    .student-tab-btn {
+      padding: 0.85rem 1.5rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .student-tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 2rem 0;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 10%;
+      right: 10%;
+      height: 4px;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+    .step-item {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      flex: 1;
+    }
+    .step-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin: 0 auto 0.5rem;
+      border: 3px solid white;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .step-item.active .step-circle {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.25);
+    }
+    .step-item.completed .step-circle {
+      background: #10b981;
+      color: white;
+    }
+    .step-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .step-item.active .step-label {
+      color: var(--primary);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <div class="brand-icon">🎓</div>
+      <div class="brand-text">
+        Apex Institute <span>Admissions</span>
+        <span class="brand-sub">Applicant Self-Service Portal</span>
+      </div>
+    </a>
+    
+    <ul class="nav-links">
+      <li class="nav-item"><a href="/">Home</a></li>
+      <li class="nav-item"><a href="/student" class="active">Student Portal</a></li>
+      <li class="nav-item"><a href="/analytics">Analytics</a></li>
+    </ul>
+
+    <div id="nav-auth-container" class="nav-links"></div>
+  </nav>
+
+  <main class="container">
+    
+    <!-- Welcome Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 id="welcome-title">Student Admission Portal</h1>
+        <p style="color: var(--text-muted);">Submit new applications, run instant ML eligibility checks, and track your admission progress.</p>
+      </div>
+      <div>
+        <span id="current-user-tag" class="badge badge-submitted" style="font-size: 0.88rem; padding: 0.5rem 1rem;">
+          Applicant Session
+        </span>
+      </div>
+    </div>
+
+    <!-- Tab Buttons -->
+    <div class="student-tabs">
+      <div class="student-tab-btn active" id="tab-status-btn" onclick="switchStudentTab('status')">
+        📍 Track My Application
+      </div>
+      <div class="student-tab-btn" id="tab-apply-btn" onclick="switchStudentTab('apply')">
+        📝 Submit New Application
+      </div>
+    </div>
+
+    <!-- TAB 1: TRACK APPLICATION STATUS -->
+    <section id="section-status">
+      <div id="no-application-banner" class="card" style="display: none; text-align: center; padding: 3rem 1.5rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
+        <h3>No Application Found for This Account</h3>
+        <p style="color: var(--text-muted); max-width: 480px; margin: 0.5rem auto 1.5rem;">
+          You haven't submitted an admission application yet. Fill out the application form with your academic details to get evaluated.
+        </p>
+        <button class="btn btn-primary" onclick="switchStudentTab('apply')">Fill Admission Form Now &rarr;</button>
+      </div>
+
+      <div id="application-details-container" style="display: none;">
+        <!-- Application Meta Header -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <h2 id="app-number" style="font-size: 1.5rem;">ADM-2026-0001</h2>
+                <span id="app-status-badge" class="badge badge-approved">Approved</span>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Applied Program: <strong id="app-course-name" style="color: #0f172a;">B.Tech Computer Science</strong>
+              </p>
+              <p style="color: var(--text-muted); font-size: 0.85rem;">
+                Submitted on: <span id="app-submission-date">--</span>
+              </p>
+            </div>
+            
+            <div style="text-align: right;">
+              <button class="btn btn-secondary btn-sm" onclick="loadMyApplication()">
+                🔄 Refresh Status
+              </button>
+            </div>
+          </div>
+
+          <!-- Application Stepper Workflow -->
+          <div class="stepper" id="application-stepper">
+            <div class="step-item completed" id="step-1">
+              <div class="step-circle">✓</div>
+              <div class="step-label">Submitted</div>
+            </div>
+            <div class="step-item" id="step-2">
+              <div class="step-circle">2</div>
+              <div class="step-label">Under Review</div>
+            </div>
+            <div class="step-item" id="step-3">
+              <div class="step-circle">3</div>
+              <div class="step-label">ML & AI Evaluated</div>
+            </div>
+            <div class="step-item" id="step-4">
+              <div class="step-circle">4</div>
+              <div class="step-label">Final Decision</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+          
+          <!-- Machine Learning Module Evaluation Card -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>🤖</span> Machine Learning Eligibility Score
+              </div>
+              <span class="badge badge-eligible" id="ml-status-badge">Eligible</span>
+            </div>
+
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Algorithm: <strong>Logistic Regression (Scikit-Learn)</strong> with probability calibrated on historical institutional cutoffs.
+            </p>
+
+            <div style="margin-bottom: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 700;">
+                <span>Admission Success Probability:</span>
+                <span id="ml-prob-val" style="color: var(--primary);">0.0%</span>
+              </div>
+              <div class="ml-meter">
+                <div class="ml-meter-fill" id="ml-meter-bar" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div style="background: #f8fafc; border-radius: var(--radius-md); padding: 1rem; border: 1px solid var(--border-color);">
+              <h4 style="font-size: 0.88rem; margin-bottom: 0.5rem; color: #334155;">Key Evaluated Metrics:</h4>
+              <ul id="ml-metrics-list" style="padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+                <li>Academic GPA: <strong id="val-gpa">--</strong></li>
+                <li>Entrance Score: <strong id="val-entrance">--</strong></li>
+                <li>Attendance Record: <strong id="val-attendance">--</strong></li>
+                <li>Category & Quota: <strong id="val-category">--</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Academic Committee Remarks & Status -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>🏛️</span> Admission Committee Decision
+              </div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">Current Status:</div>
+              <div id="decision-status-text" style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">--</div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">Official Officer Remarks:</div>
+              <div id="decision-remarks-text" style="font-size: 0.92rem; color: #334155; background: #f8fafc; padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                No remarks posted yet.
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">Uploaded Academic Dossier:</div>
+              <div id="uploaded-doc-preview" style="font-size: 0.88rem;">
+                <span style="color: var(--text-muted);">None uploaded</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Generative AI Report Card -->
+        <div class="ai-report-card">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+            <h3 style="font-size: 1.2rem; color: #581c87;">AI-Generated Admission Evaluation & Insights</h3>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <h4 style="font-size: 0.92rem; color: #6b21a8; margin-bottom: 0.35rem;">Evaluation Executive Summary</h4>
+            <p id="ai-summary-text" style="font-size: 0.92rem; color: #374151; line-height: 1.55;">
+              Loading AI summary...
+            </p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <div style="background: rgba(255, 255, 255, 0.7); padding: 1rem; border-radius: var(--radius-md); border: 1px solid #f3e8ff;">
+              <h4 style="font-size: 0.88rem; color: #6b21a8; margin-bottom: 0.35rem;">Admission Recommendation</h4>
+              <p id="ai-recommendation-text" style="font-size: 0.88rem; color: #1f2937;">--</p>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.7); padding: 1rem; border-radius: var(--radius-md); border: 1px solid #f3e8ff;">
+              <h4 style="font-size: 0.88rem; color: #6b21a8; margin-bottom: 0.35rem;">Profile Insights & Analysis</h4>
+              <p id="ai-insights-text" style="font-size: 0.88rem; color: #1f2937; white-space: pre-line;">--</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: SUBMIT NEW APPLICATION FORM -->
+    <section id="section-apply" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📝</span> University Admission Application Form (2026 Cycle)
+          </div>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">* All fields mandatory for ML scoring</span>
+        </div>
+
+        <form id="admission-form" onsubmit="handleApplicationSubmit(event)">
+          
+          <h3 style="font-size: 1.05rem; margin-bottom: 1rem; color: var(--primary);">1. Personal & Contact Information</h3>
+          <div class="form-grid" style="margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="form-fullname">Full Name <span class="required">*</span></label>
+              <input type="text" id="form-fullname" required placeholder="e.g. Priya Sharma">
+            </div>
+
+            <div class="form-group">
+              <label for="form-email">Email Address <span class="required">*</span></label>
+              <input type="email" id="form-email" required placeholder="priya.sharma@example.com">
+            </div>
+
+            <div class="form-group">
+              <label for="form-phone">Phone Number <span class="required">*</span></label>
+              <input type="text" id="form-phone" required placeholder="+91 98765 43210">
+            </div>
+
+            <div class="form-group">
+              <label for="form-dob">Date of Birth <span class="required">*</span></label>
+              <input type="date" id="form-dob" required>
+            </div>
+
+            <div class="form-group">
+              <label for="form-gender">Gender <span class="required">*</span></label>
+              <select id="form-gender" required>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="form-address">Residential Address</label>
+              <input type="text" id="form-address" placeholder="City, State, PIN">
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.05rem; margin-bottom: 1rem; color: var(--primary);">2. Academic Performance & Entrance Records</h3>
+          <div class="form-grid" style="margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="form-course">Select Degree Course <span class="required">*</span></label>
+              <select id="form-course" required>
+                <option value="">-- Choose Course --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="form-gpa">Academic Marks / GPA (%) <span class="required">*</span></label>
+              <input type="number" id="form-gpa" min="0" max="100" step="0.1" required placeholder="e.g. 88.5">
+            </div>
+
+            <div class="form-group">
+              <label for="form-entrance">Entrance Exam Score (0-100) <span class="required">*</span></label>
+              <input type="number" id="form-entrance" min="0" max="100" step="0.1" required placeholder="e.g. 91.0">
+            </div>
+
+            <div class="form-group">
+              <label for="form-attendance">Attendance Percentage (%) <span class="required">*</span></label>
+              <input type="number" id="form-attendance" min="0" max="100" step="0.1" required placeholder="e.g. 94.0">
+            </div>
+
+            <div class="form-group">
+              <label for="form-prevscore">Previous Academic / 10th-12th Score (%) <span class="required">*</span></label>
+              <input type="number" id="form-prevscore" min="0" max="100" step="0.1" required placeholder="e.g. 86.5">
+            </div>
+
+            <div class="form-group">
+              <label for="form-category">Category / Quota <span class="required">*</span></label>
+              <select id="form-category" required>
+                <option value="General">General</option>
+                <option value="OBC">OBC (Other Backward Classes)</option>
+                <option value="SC_ST">SC / ST</option>
+                <option value="EWS">EWS (Economically Weaker Section)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="form-extracurricular">Extracurricular Achievements <span class="required">*</span></label>
+              <select id="form-extracurricular" required>
+                <option value="None">None / Regular</option>
+                <option value="School_Level">School / District Level</option>
+                <option value="State_Level">State Level Representation</option>
+                <option value="National_Level">National Level Honors / Olympiad</option>
+              </select>
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.05rem; margin-bottom: 1rem; color: var(--primary);">3. Upload Supporting Academic Marksheets</h3>
+          <div class="file-upload-box" style="margin-bottom: 1.5rem;">
+            <div style="font-size: 2.2rem; color: var(--primary); margin-bottom: 0.5rem;">📁</div>
+            <h4>Click or Drag & Drop Academic Marksheet / Certificate</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.35rem;">
+              Accepted formats: PDF, JPG, PNG (Max 16 MB)
+            </p>
+            <input type="file" id="form-document" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleFileSelected(this)">
+            <div id="file-selected-name" style="margin-top: 0.75rem; font-weight: 700; color: var(--primary);"></div>
+          </div>
+
+          <!-- Live ML Pre-Check Preview Box -->
+          <div style="background: #f1f5f9; border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">🤖 Instant ML Eligibility Pre-Check</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+                Test your scores against our Logistic Regression model before finalizing submission.
+              </p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="runLivePrecheck()">
+              ⚡ Run ML Pre-Check
+            </button>
+          </div>
+
+          <!-- Precheck Output Modal/Notice -->
+          <div id="precheck-result" style="display: none; margin-bottom: 1.5rem; padding: 1rem; border-radius: var(--radius-md);"></div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="switchStudentTab('status')">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-lg" id="submit-app-btn">
+              Submit Final Application 🚀
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Apex Institute of Technology • Admission Management System</p>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/student.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+# ==============================================================================
+# Netlify Deployment Configuration
+# AI-Enhanced Admission Management System
+# ==============================================================================
+
+[build]
+  # Publish directory for static frontend
+  publish = "Frontend"
+
+# Route clean URLs to the corresponding HTML files
+[[redirects]]
+  from = "/login"
+  to = "/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/student"
+  to = "/student.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/analytics"
+  to = "/analytics.html"
+  status = 200
+
+# Proxy /api calls to backend (configured via BACKEND_URL environment variable or placeholder)
+[[redirects]]
+  from = "/api/*"
+  to = "https://your-backend-api.onrender.com/api/:splat"
+  status = 200
+  force = false
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

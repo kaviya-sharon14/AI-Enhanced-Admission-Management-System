@@ -1,0 +1,37 @@
+{
+    "algorithm": "Logistic Regression",
+    "hyperparameters": {
+        "C": 1.0,
+        "penalty": "l2",
+        "solver": "lbfgs",
+        "max_iter": 1000
+    },
+    "dataset_size": 2500,
+    "features": [
+        "academic_gpa",
+        "entrance_score",
+        "attendance_pct",
+        "prev_academic_score",
+        "category",
+        "extracurricular"
+    ],
+    "metrics": {
+        "accuracy": 0.948,
+        "precision": 0.9629,
+        "recall": 0.98,
+        "f1_score": 0.9714,
+        "roc_auc": 0.9472,
+        "cv_mean_accuracy": 0.937,
+        "cv_std_accuracy": 0.0148,
+        "confusion_matrix": [
+            [
+                33,
+                17
+            ],
+            [
+                9,
+                441
+            ]
+        ]
+    }
+}
