@@ -1,22 +1,37 @@
 # AI-Enhanced Admission Management System
 
+> 🚀 **Live Production Deployment (Netlify):** [https://gradiousadmissionmanagementsystem.netlify.app/](https://gradiousadmissionmanagementsystem.netlify.app/)  
+> 🎓 **Institutional Portal:** Apex Institute of Technology • Admission Management Platform
+
 An institutional-grade, full-stack educational management platform engineered for universities and academic institutions to automate student admission workflows, predict applicant eligibility using Machine Learning (**Logistic Regression**), synthesize comprehensive candidate dossiers with **Generative AI**, and provide real-time institutional enrollment analytics.
 
 ---
 
 ## 📌 Table of Contents
-1. [Project Title & Overview](#-project-title--overview)
-2. [Web Portal Visual Walkthrough (Screenshots)](#-web-portal-visual-walkthrough)
-3. [Technologies Used](#-technologies-used)
-4. [Setup Instructions](#-setup-instructions)
-5. [Steps to Run the Backend](#-steps-to-run-the-backend)
-6. [Steps to Run the Frontend](#-steps-to-run-the-frontend)
-7. [Database Setup Details (SQLite & MongoDB)](#-database-setup-details)
-8. [Machine Learning Model Details](#-machine-learning-model-details)
-9. [Generative AI & API Key Instructions](#-generative-ai--api-key-instructions)
-10. [Pre-Configured Test Credentials](#-pre-configured-test-credentials)
-11. [REST API Endpoints](#-rest-api-endpoints)
-12. [Hosting on Netlify & GitHub Push Instructions](#-hosting-on-netlify--github-deployment)
+1. [Live Web Deployment (Netlify)](#-live-web-deployment-netlify)
+2. [Project Title & Overview](#-project-title--overview)
+3. [Web Portal Visual Walkthrough (Screenshots)](#-web-portal-visual-walkthrough)
+4. [Technologies Used](#-technologies-used)
+5. [Setup Instructions](#-setup-instructions)
+6. [Steps to Run the Backend](#-steps-to-run-the-backend)
+7. [Steps to Run the Frontend](#-steps-to-run-the-frontend)
+8. [Database Setup Details (SQLite & MongoDB)](#-database-setup-details)
+9. [Machine Learning Model Details](#-machine-learning-model-details)
+10. [Generative AI & API Key Instructions](#-generative-ai--api-key-instructions)
+11. [Pre-Configured Test Credentials](#-pre-configured-test-credentials)
+12. [REST API Endpoints](#-rest-api-endpoints)
+13. [Hosting on Netlify & GitHub Instructions](#-hosting-on-netlify--github-deployment)
+
+---
+
+## 🌐 Live Web Deployment (Netlify)
+
+The frontend web portal is live and accessible online at:
+* 🏠 **Main Portal Home:** [https://gradiousadmissionmanagementsystem.netlify.app/](https://gradiousadmissionmanagementsystem.netlify.app/)
+* 🔐 **Login / Register / Forgot Password:** [https://gradiousadmissionmanagementsystem.netlify.app/login](https://gradiousadmissionmanagementsystem.netlify.app/login)
+* 👨‍🎓 **Student Application Portal:** [https://gradiousadmissionmanagementsystem.netlify.app/student](https://gradiousadmissionmanagementsystem.netlify.app/student)
+* 🛡️ **Admission Officer Review Console:** [https://gradiousadmissionmanagementsystem.netlify.app/admin](https://gradiousadmissionmanagementsystem.netlify.app/admin)
+* 📊 **Executive Analytics & Reports:** [https://gradiousadmissionmanagementsystem.netlify.app/analytics](https://gradiousadmissionmanagementsystem.netlify.app/analytics)
 
 ---
 
@@ -25,6 +40,7 @@ An institutional-grade, full-stack educational management platform engineered fo
 * **Project Title:** AI-Enhanced Admission Management System
 * **Institution:** Apex Institute of Technology
 * **Application Scope:** Enterprise Admissions, Automated Evaluation, and Applicant Analytics
+* **Live URL:** [https://gradiousadmissionmanagementsystem.netlify.app/](https://gradiousadmissionmanagementsystem.netlify.app/)
 
 ### Overview
 Traditional university admission cycles suffer from manual bottlenecks, human review fatigue, delayed decision cycles, and subjective inconsistencies. This system delivers a modern, automated solution:
@@ -303,13 +319,14 @@ To push to your GitHub account (`https://github.com/kaviya-sharon14`):
    git push -u origin main
    ```
 
-### 2. Netlify Deployment
-* The repository includes [`netlify.toml`](file:///c:/Users/user/Downloads/gradious%20project%20for%20submmision/netlify.toml) and [`Frontend/_redirects`](file:///c:/Users/user/Downloads/gradious%20project%20for%20submmision/Frontend/_redirects) for zero-config deployment.
+### 2. Netlify Live Deployment
+* **Live Production URL:** [https://gradiousadmissionmanagementsystem.netlify.app/](https://gradiousadmissionmanagementsystem.netlify.app/)
+* The repository includes [`netlify.toml`](netlify.toml) and [`Frontend/_redirects`](Frontend/_redirects) for zero-config deployment and clean URL routing across all portal subpages.
 * **Option A (Instant Drag & Drop):**
   1. Open [app.netlify.com](https://app.netlify.com) and log in.
   2. Drag and drop the `Frontend/` folder into the Netlify Sites dashboard.
 * **Option B (Connected to GitHub):**
   1. In Netlify, click **"Add new site"** ➔ **"Import an existing project from GitHub"**.
-  2. Select your repository `kaviya-sharon14/AI-Admission-Management-System`.
-  3. Netlify will auto-detect `netlify.toml` and deploy the site instantly.
+  2. Select your repository `kaviya-sharon14/AI-Enhanced-Admission-Management-System`.
+  3. Netlify auto-detects `netlify.toml` and continuous deployment is enabled.
 
