@@ -481,21 +481,129 @@ const api = {
     if (endpoint === '/applications/my') {
       const apps = getStoredApplications();
       const currentUser = this.getUser();
-      const myApp = (currentUser && apps.find(a => a.email.toLowerCase() === currentUser.email.toLowerCase())) || apps[0];
-      return { success: true, application: myApp };
-    }
-
-    // 11. GET ALL APPLICATIONS
-    if (endpoint.startsWith('/applications')) {
-      const apps = getStoredApplications();
+      let userApps = [];
+      if (currentUser && currentUser.email) {
+        userApps = apps.filter(a => 
+          (a.email && a.email.toLowerCase() === currentUser.email.toLowerCase()) || 
+          (a.user_id && currentUser.id && a.user_id == currentUser.id)
+        );
+      }
+      if (userApps.length === 0 && apps.length > 0) {
+        // Fallback to most recent application for seamless demo experience
+        userApps = [apps[0]];
+      }
       return {
         success: true,
-        applications: apps,
-        pagination: { total: apps.length, page: 1, limit: 10, pages: 1 }
+        application: userApps[0] || null,
+        applications: userApps
       };
     }
 
-    // 12. ANALYTICS
+    // 11. UPDATE APPLICATION STATUS (Admin PUT action)
+    if (endpoint.match(/^\/applications\/[^\/]+\/status$/) && options.method === 'PUT') {
+      const parts = endpoint.split('/');
+      const appId = parts[2];
+      const apps = getStoredApplications();
+      const idx = apps.findIndex(a => a.id == appId || a.application_no == appId);
+      if (idx !== -1) {
+        const { status, remarks } = body;
+        apps[idx].status = status;
+        if (remarks !== undefined) {
+          apps[idx].admin_remarks = remarks;
+        }
+        saveStoredApplications(apps);
+        return { success: true, message: `Status updated to ${status}`, application: apps[idx] };
+      }
+      throw new Error('Application not found');
+    }
+
+    // 12. GET SPECIFIC APPLICATION DETAIL (Admin/Student GET action)
+    if (endpoint.match(/^\/applications\/[^\/\?]+$/) && options.method === 'GET') {
+      const parts = endpoint.split('/');
+      const appId = parts[2];
+      const apps = getStoredApplications();
+      const app = apps.find(a => a.id == appId || a.application_no == appId);
+      if (app) {
+        return { success: true, application: app };
+      }
+      throw new Error('Application not found');
+    }
+
+    // 13. GET ALL APPLICATIONS (Admin GET list with optional filters)
+    if (endpoint.startsWith('/applications')) {
+      const apps = getStoredApplications();
+      try {
+        const url = new URL('http://dummy' + endpoint);
+        const statusParam = url.searchParams.get('status');
+        const courseParam = url.searchParams.get('course');
+        const searchParam = (url.searchParams.get('search') || '').trim().toLowerCase();
+
+        let filtered = apps;
+        if (statusParam && statusParam !== 'All') {
+          filtered = filtered.filter(a => (a.status || '').toLowerCase() === statusParam.toLowerCase());
+        }
+        if (courseParam && courseParam !== 'All') {
+          filtered = filtered.filter(a => a.course_code === courseParam);
+        }
+        if (searchParam) {
+          filtered = filtered.filter(a => 
+            (a.full_name && a.full_name.toLowerCase().includes(searchParam)) ||
+            (a.email && a.email.toLowerCase().includes(searchParam)) ||
+            (a.application_no && a.application_no.toLowerCase().includes(searchParam))
+          );
+        }
+
+        return {
+          success: true,
+          applications: filtered,
+          pagination: { total: filtered.length, page: 1, limit: 10, pages: 1 }
+        };
+      } catch (e) {
+        return {
+          success: true,
+          applications: apps,
+          pagination: { total: apps.length, page: 1, limit: 10, pages: 1 }
+        };
+      }
+    }
+
+    // 14. GENAI APPLICATION EVALUATION
+    if (endpoint.startsWith('/genai/evaluate/')) {
+      const parts = endpoint.split('/');
+      const appId = parts[3];
+      const apps = getStoredApplications();
+      const idx = apps.findIndex(a => a.id == appId || a.application_no == appId);
+      const app = idx !== -1 ? apps[idx] : null;
+      const directive = body.instructions || '';
+      
+      const gpa = app ? app.academic_gpa : 85;
+      const entrance = app ? app.entrance_score : 80;
+      const isEligible = gpa >= 70 && entrance >= 65;
+      
+      const report = {
+        evaluation_summary: `Candidate ${app ? app.full_name : 'Applicant'} demonstrates strong foundational prerequisites with academic GPA ${gpa}% and entrance score ${entrance}/100. ${directive ? 'Special Directive: "' + directive + '" has been prioritized in admission weighting.' : 'Profile aligned with institutional academic standards.'}`,
+        admission_recommendation: isEligible ? 'Recommend Admission' : 'Conditional Review Recommended',
+        approval_rejection_explanation: isEligible 
+          ? 'Qualifying examination marks satisfy institutional cutoff guidelines.' 
+          : 'Entrance and qualifying marks are below the primary cutoff threshold; requires committee discretion.',
+        profile_insights: `• Academic GPA: ${gpa}%\n• Entrance Score: ${entrance} / 100\n• Extracurricular: ${(app && app.extracurricular ? app.extracurricular : 'Standard').replace('_', ' ')}\n• Document Verification: Marksheet authentic and verified.`
+      };
+
+      if (idx !== -1) {
+        apps[idx].ai_evaluation_summary = report.evaluation_summary;
+        apps[idx].ai_recommendation = report.admission_recommendation;
+        apps[idx].ai_explanation = report.approval_rejection_explanation;
+        apps[idx].ai_profile_insights = report.profile_insights;
+        saveStoredApplications(apps);
+      }
+
+      return {
+        success: true,
+        report: report
+      };
+    }
+
+    // 15. ANALYTICS
     if (endpoint === '/analytics/summary') {
       const apps = getStoredApplications();
       return {

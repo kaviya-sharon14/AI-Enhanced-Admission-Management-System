@@ -101,38 +101,41 @@ function renderApplicationsTable(list) {
   }
 
   tbody.innerHTML = list.map(app => {
-    const probPct = app.ml_probability ? (app.ml_probability * 100).toFixed(1) + '%' : 'N/A';
-    const isEligible = app.ml_prediction === 'Eligible for Admission';
+    const prob = app.ml_probability;
+    const probPct = (prob !== undefined && prob !== null) 
+      ? (prob > 1 ? Number(prob).toFixed(1) : (Number(prob) * 100).toFixed(1)) + '%' 
+      : 'N/A';
+    const isEligible = app.ml_prediction && (app.ml_prediction.toLowerCase().includes('eligible') && !app.ml_prediction.toLowerCase().includes('not'));
     const mlBadgeClass = isEligible ? 'badge-eligible' : 'badge-not-eligible';
     const statusBadgeClass = getBadgeClass(app.status);
 
     return `
       <tr>
-        <td><strong>${app.application_no}</strong></td>
+        <td><strong>${app.application_no || 'APP-2026'}</strong></td>
         <td>
-          <div style="font-weight: 700;">${escapeHtml(app.full_name)}</div>
-          <div style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(app.email)}</div>
+          <div style="font-weight: 700;">${escapeHtml(app.full_name || 'Applicant')}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">${escapeHtml(app.email || '')}</div>
         </td>
         <td style="max-width: 220px;">
           <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;">
-            ${escapeHtml(app.course_name || app.course_code)}
+            ${escapeHtml(app.course_name || app.course_code || 'Degree Course')}
           </div>
-          <div style="font-size: 0.75rem; color: var(--text-muted);">${app.course_code}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">${app.course_code || ''}</div>
         </td>
-        <td><strong>${app.academic_gpa}%</strong></td>
-        <td><strong>${app.entrance_score}</strong></td>
-        <td><span style="font-size: 0.8rem; font-weight: 600;">${app.category}</span></td>
+        <td><strong>${app.academic_gpa || 0}%</strong></td>
+        <td><strong>${app.entrance_score || 0}</strong></td>
+        <td><span style="font-size: 0.8rem; font-weight: 600;">${app.category || 'General'}</span></td>
         <td>
-          <span class="badge ${mlBadgeClass}">${app.ml_prediction || 'Evaluated'}</span>
+          <span class="badge ${mlBadgeClass}">${app.ml_prediction || (isEligible ? 'Eligible' : 'Not Eligible')}</span>
           <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
             Prob: <strong>${probPct}</strong>
           </div>
         </td>
         <td>
-          <span class="badge ${statusBadgeClass}">${app.status}</span>
+          <span class="badge ${statusBadgeClass}">${app.status || 'Submitted'}</span>
         </td>
         <td>
-          <button class="btn btn-primary btn-sm" onclick="openApplicationModal(${app.id})">
+          <button type="button" class="btn btn-primary btn-sm" onclick="openApplicationModal('${app.id}')">
             🔍 Review & AI Dossier
           </button>
         </td>
@@ -144,31 +147,37 @@ function renderApplicationsTable(list) {
 async function openApplicationModal(appId) {
   activeAppId = appId;
   const modal = document.getElementById('app-modal');
-  modal.classList.add('active');
+  if (modal) modal.classList.add('active');
 
   try {
     const res = await api.getApplicationDetail(appId);
     const app = res.application;
+    if (!app) {
+      showToast('Could not find application details.', 'error');
+      closeModal();
+      return;
+    }
 
-    document.getElementById('modal-app-no').innerText = app.application_no;
-    document.getElementById('modal-candidate-name').innerText = `(${app.full_name})`;
-    document.getElementById('modal-course').innerText = `${app.course_name} (${app.course_code})`;
-    document.getElementById('modal-date').innerText = new Date(app.submitted_at).toLocaleDateString();
+    document.getElementById('modal-app-no').innerText = app.application_no || 'APP-2026';
+    document.getElementById('modal-candidate-name').innerText = `(${app.full_name || 'Applicant'})`;
+    document.getElementById('modal-course').innerText = `${app.course_name || app.course_code || 'Course'} (${app.course_code || ''})`;
+    document.getElementById('modal-date').innerText = app.submitted_at ? new Date(app.submitted_at).toLocaleDateString() : 'Recent';
 
+    const currentStatus = app.status || 'Submitted';
     const statusBadge = document.getElementById('modal-status-badge');
-    statusBadge.innerText = app.status;
-    statusBadge.className = 'badge ' + getBadgeClass(app.status);
+    statusBadge.innerText = currentStatus;
+    statusBadge.className = 'badge ' + getBadgeClass(currentStatus);
 
     // Profile table
-    document.getElementById('m-email').innerText = app.email;
-    document.getElementById('m-phone').innerText = app.phone;
-    document.getElementById('m-dob-gender').innerText = `${app.dob} • ${app.gender}`;
-    document.getElementById('m-category').innerText = app.category;
-    document.getElementById('m-ec').innerText = app.extracurricular.replace('_', ' ');
-    document.getElementById('m-gpa').innerText = `${app.academic_gpa}%`;
-    document.getElementById('m-entrance').innerText = `${app.entrance_score} / 100`;
-    document.getElementById('m-attendance').innerText = `${app.attendance_pct}%`;
-    document.getElementById('m-prev').innerText = `${app.prev_academic_score}%`;
+    document.getElementById('m-email').innerText = app.email || 'N/A';
+    document.getElementById('m-phone').innerText = app.phone || 'N/A';
+    document.getElementById('m-dob-gender').innerText = `${app.dob || 'N/A'} • ${app.gender || 'N/A'}`;
+    document.getElementById('m-category').innerText = app.category || 'General';
+    document.getElementById('m-ec').innerText = (app.extracurricular || 'None').toString().replace('_', ' ');
+    document.getElementById('m-gpa').innerText = `${app.academic_gpa || 0}%`;
+    document.getElementById('m-entrance').innerText = `${app.entrance_score || 0} / 100`;
+    document.getElementById('m-attendance').innerText = `${app.attendance_pct || 0}%`;
+    document.getElementById('m-prev').innerText = `${app.prev_academic_score || 0}%`;
 
     // Doc preview
     const docBox = document.getElementById('m-doc-container');
@@ -183,13 +192,17 @@ async function openApplicationModal(appId) {
     }
 
     // ML Module Info
-    const probPct = (app.ml_probability ? (app.ml_probability * 100).toFixed(1) : '0.0') + '%';
+    const prob = app.ml_probability;
+    const probPct = (prob !== undefined && prob !== null) 
+      ? (prob > 1 ? Number(prob).toFixed(1) : (Number(prob) * 100).toFixed(1)) + '%' 
+      : '0.0%';
     document.getElementById('m-ml-prob').innerText = probPct;
     document.getElementById('m-ml-meter').style.width = probPct;
     
+    const isEligible = app.ml_prediction && (app.ml_prediction.toLowerCase().includes('eligible') && !app.ml_prediction.toLowerCase().includes('not'));
     const mlBadge = document.getElementById('m-ml-badge');
-    mlBadge.innerText = app.ml_prediction || 'Evaluated';
-    mlBadge.className = 'badge ' + (app.ml_prediction === 'Eligible for Admission' ? 'badge-eligible' : 'badge-not-eligible');
+    mlBadge.innerText = app.ml_prediction || (isEligible ? 'Eligible' : 'Not Eligible');
+    mlBadge.className = 'badge ' + (isEligible ? 'badge-eligible' : 'badge-not-eligible');
 
     // GenAI Section
     document.getElementById('m-ai-summary').innerText = app.ai_evaluation_summary || 'No AI summary generated yet.';
@@ -208,7 +221,7 @@ async function openApplicationModal(appId) {
 
 function closeModal() {
   const modal = document.getElementById('app-modal');
-  modal.classList.remove('active');
+  if (modal) modal.classList.remove('active');
   activeAppId = null;
 }
 
@@ -252,8 +265,17 @@ async function saveStatusChange(newStatus) {
       showToast(`Admission status updated to "${newStatus}"!`, 'success');
       
       const badge = document.getElementById('modal-status-badge');
-      badge.innerText = newStatus;
-      badge.className = 'badge ' + getBadgeClass(newStatus);
+      if (badge) {
+        badge.innerText = newStatus;
+        badge.className = 'badge ' + getBadgeClass(newStatus);
+      }
+
+      // Also update in local applicationsList memory
+      const target = applicationsList.find(a => a.id == activeAppId || a.application_no == activeAppId);
+      if (target) {
+        target.status = newStatus;
+        target.admin_remarks = remarks;
+      }
 
       await loadApplications();
     }

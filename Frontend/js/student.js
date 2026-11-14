@@ -171,49 +171,60 @@ async function loadMyApplication() {
 
   try {
     const res = await api.getMyApplications();
-    if (!res.success || res.applications.length === 0) {
-      noAppBanner.style.display = 'block';
-      detailsContainer.style.display = 'none';
+    const appList = (res && res.applications && res.applications.length > 0)
+      ? res.applications
+      : (res && res.application ? [res.application] : []);
+
+    if (!res || !res.success || appList.length === 0 || !appList[0]) {
+      if (noAppBanner) noAppBanner.style.display = 'block';
+      if (detailsContainer) detailsContainer.style.display = 'none';
       return;
     }
 
-    noAppBanner.style.display = 'none';
-    detailsContainer.style.display = 'block';
+    if (noAppBanner) noAppBanner.style.display = 'none';
+    if (detailsContainer) detailsContainer.style.display = 'block';
 
-    const app = res.applications[0]; // Most recent application
+    const app = appList[0]; // Most recent application
     myApplication = app;
 
     // Header info
-    document.getElementById('app-number').innerText = app.application_no;
-    document.getElementById('app-course-name').innerText = `${app.course_name || app.course_code} (${app.course_code})`;
-    document.getElementById('app-submission-date').innerText = new Date(app.submitted_at).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
+    document.getElementById('app-number').innerText = app.application_no || 'APP-2026';
+    document.getElementById('app-course-name').innerText = `${app.course_name || app.course_code || 'Degree Course'} (${app.course_code || ''})`;
+    document.getElementById('app-submission-date').innerText = app.submitted_at 
+      ? new Date(app.submitted_at).toLocaleDateString('en-US', {
+          year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        })
+      : 'Recently Submitted';
 
     // Status Badge
+    const currentStatus = app.status || 'Submitted';
     const statusBadge = document.getElementById('app-status-badge');
-    statusBadge.innerText = app.status;
-    statusBadge.className = 'badge ' + getBadgeClass(app.status);
+    statusBadge.innerText = currentStatus;
+    statusBadge.className = 'badge ' + getBadgeClass(currentStatus);
 
     // Stepper updates
-    updateStepper(app.status);
+    updateStepper(currentStatus);
 
     // ML Module Info
-    const probPct = (app.ml_probability ? (app.ml_probability * 100).toFixed(1) : '0.0') + '%';
+    const prob = app.ml_probability;
+    const probPct = (prob !== undefined && prob !== null) 
+      ? (prob > 1 ? Number(prob).toFixed(1) : (Number(prob) * 100).toFixed(1)) + '%' 
+      : '0.0%';
     document.getElementById('ml-prob-val').innerText = probPct;
     document.getElementById('ml-meter-bar').style.width = probPct;
     
+    const isEligible = app.ml_prediction && (app.ml_prediction.toLowerCase().includes('eligible') && !app.ml_prediction.toLowerCase().includes('not'));
     const mlBadge = document.getElementById('ml-status-badge');
-    mlBadge.innerText = app.ml_prediction || 'Evaluated';
-    mlBadge.className = 'badge ' + (app.ml_prediction === 'Eligible for Admission' ? 'badge-eligible' : 'badge-not-eligible');
+    mlBadge.innerText = app.ml_prediction || (isEligible ? 'Eligible' : 'Not Eligible');
+    mlBadge.className = 'badge ' + (isEligible ? 'badge-eligible' : 'badge-not-eligible');
 
-    document.getElementById('val-gpa').innerText = `${app.academic_gpa}%`;
-    document.getElementById('val-entrance').innerText = `${app.entrance_score} / 100`;
-    document.getElementById('val-attendance').innerText = `${app.attendance_pct}%`;
-    document.getElementById('val-category').innerText = `${app.category} (${app.extracurricular.replace('_', ' ')})`;
+    document.getElementById('val-gpa').innerText = `${app.academic_gpa || 0}%`;
+    document.getElementById('val-entrance').innerText = `${app.entrance_score || 0} / 100`;
+    document.getElementById('val-attendance').innerText = `${app.attendance_pct || 0}%`;
+    document.getElementById('val-category').innerText = `${app.category || 'General'} (${(app.extracurricular || 'None').toString().replace('_', ' ')})`;
 
     // Decision info
-    document.getElementById('decision-status-text').innerText = app.status;
+    document.getElementById('decision-status-text').innerText = currentStatus;
     document.getElementById('decision-remarks-text').innerText = app.admin_remarks || 'Your application is currently being processed by the admissions committee.';
 
     // Document preview link
@@ -221,7 +232,7 @@ async function loadMyApplication() {
     if (app.document_name) {
       docPreview.innerHTML = `
         <a href="/uploads/${app.document_path ? app.document_path.split('\\').pop().split('/').pop() : ''}" target="_blank" class="btn btn-secondary btn-sm" style="margin-top: 0.35rem;">
-          📄 View ${app.document_name}
+          📄 View ${escapeHtml(app.document_name)}
         </a>
       `;
     } else {
@@ -235,8 +246,8 @@ async function loadMyApplication() {
 
   } catch (err) {
     console.error('Error fetching applications:', err);
-    noAppBanner.style.display = 'block';
-    detailsContainer.style.display = 'none';
+    if (noAppBanner) noAppBanner.style.display = 'block';
+    if (detailsContainer) detailsContainer.style.display = 'none';
   }
 }
 
@@ -256,21 +267,42 @@ function updateStepper(status) {
   const s3 = document.getElementById('step-3');
   const s4 = document.getElementById('step-4');
 
+  if (!s1 || !s2 || !s3 || !s4) return;
+
   [s1, s2, s3, s4].forEach(s => {
     s.className = 'step-item';
   });
 
-  s1.classList.add('completed');
+  const normStatus = (status || '').toLowerCase();
 
-  if (status === 'Submitted') {
+  if (normStatus === 'submitted') {
     s1.classList.add('active');
-  } else if (status === 'Under Review') {
+  } else if (normStatus === 'under review') {
     s1.classList.add('completed');
     s2.classList.add('active');
-  } else if (status === 'Approved' || status === 'Rejected' || status === 'Waitlisted') {
+  } else if (normStatus === 'approved') {
     s1.classList.add('completed');
     s2.classList.add('completed');
     s3.classList.add('completed');
     s4.classList.add('completed');
+    s4.classList.add('active');
+  } else if (normStatus === 'rejected') {
+    s1.classList.add('completed');
+    s2.classList.add('completed');
+    s3.classList.add('completed');
+    s4.classList.add('completed');
+  } else if (normStatus === 'waitlisted') {
+    s1.classList.add('completed');
+    s2.classList.add('completed');
+    s3.classList.add('active');
+  } else {
+    s1.classList.add('active');
   }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.toString().replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[m]);
 }
